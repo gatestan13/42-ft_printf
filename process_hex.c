@@ -1,0 +1,65 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   process_hex.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gatan <gatan@student.42kl.edu.my>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/05/24 02:13:48 by gatan             #+#    #+#             */
+/*   Updated: 2021/05/24 02:44:35 by gatan            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "ft_printf.h"
+
+static int	process_hex_helper2(t_flags flags, char *numstr)
+{
+	int	length;
+
+	length = 0;
+	if (flags.dot >= 0)
+		length += process_width(flags.dot, ft_strlen(numstr), 1);
+	length += putstr_max(numstr, ft_strlen(numstr));
+	return (length);
+}
+
+static int	process_hex_helper(t_flags flags, char *numstr)
+{
+	int	length;
+
+	length = 0;
+	if (flags.dot >= 0 && flags.dot < (int)ft_strlen(numstr))
+		flags.dot = ft_strlen(numstr);
+	if (flags.dot >= 0)
+		flags.width -= flags.dot;
+	if (flags.minus == 1)
+		length += process_hex_helper2(flags, numstr);
+	if (flags.dot >= 0)
+		length += process_width(flags.width, 0, 0);
+	else if (flags.dot < 0 && flags.minus == 0)
+		length += process_width(flags.width, ft_strlen(numstr), flags.zero);
+	else
+		length += process_width(flags.width, ft_strlen(numstr), 0);
+	if (flags.minus == 0)
+		length += process_hex_helper2(flags, numstr);
+	return (length);
+}
+
+int	process_hex(t_flags flags, unsigned int num, int mode)
+{
+	int		length;
+	char	*numstr;
+
+	length = 0;
+	if (flags.dot == 0 && num == 0)
+	{
+		length += process_width(flags.width, 0, 0);
+		return (length);
+	}
+	numstr = ui_to_base(num, 16);
+	if (mode == 0)
+		numstr = str_tolower(numstr);
+	length += process_hex_helper(flags, numstr);
+	free(numstr);
+	return (length);
+}
